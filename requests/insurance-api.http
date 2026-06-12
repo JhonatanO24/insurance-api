@@ -1,0 +1,409 @@
+###
+### INSURANCE API — Colección completa de requests
+###
+
+@baseUrl = http://localhost:8080/api
+@contentType = application/json
+
+### ── Variables (llenar tras crear recursos) ──
+@customerId = {{create_customer.response.body.id}}
+@policyId   = {{create_policy_auto.response.body.id}}
+
+
+###
+### 1. CUSTOMERS
+###
+
+### 1.1 Crear cliente ✅ → 201
+# @name create_customer
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "Juan Pérez",
+  "email": "juan.perez@email.com"
+}
+
+###
+
+### 1.2 Crear segundo cliente (para pruebas LOYALTY)
+# @name create_customer_loyalty
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "María López",
+  "email": "maria.lopez@email.com"
+}
+
+###
+
+### 1.3 Obtener cliente por ID ✅ → 200
+GET {{baseUrl}}/customers/{{customerId}}
+Content-Type: {{contentType}}
+
+###
+
+### 1.4 Email duplicado ✅ → 409
+POST {{baseUrl}}/customers
+Content-Type: {{contentType}}
+
+{
+  "name": "Otro Juan",
+  "email": "juan.perez@email.com"
+}
+
+###
+
+### 1.5 Cliente inexistente ✅ → 404
+GET {{baseUrl}}/customers/00000000-0000-0000-0000-000000000000
+Content-Type: {{contentType}}
+
+
+###
+### 2. CREAR PÓLIZAS — 4 ramos x 3 estrategias
+###
+
+### ── RAMO AUTO
+
+### 2.1 AUTO + STANDARD ✅ → 201 | premium: 120.000
+# @name create_policy_auto
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "AUTO",
+  "ratingStrategy": "STANDARD"
+}
+
+###
+
+### 2.2 AUTO + RISK_BASED (riskScore=50) ✅ → 201 | premium: 180.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "AUTO",
+  "ratingStrategy": "RISK_BASED",
+  "riskScore": 50
+}
+
+###
+
+### 2.3 AUTO + LOYALTY (customerSince=2020) ✅ → 201 | premium: 102.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "AUTO",
+  "ratingStrategy": "LOYALTY",
+  "customerSince": 2020
+}
+
+###
+
+### ── RAMO LIFE ──────────────────────────────────
+
+### 2.4 LIFE + STANDARD ✅ → 201 | premium: 90.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "LIFE",
+  "ratingStrategy": "STANDARD"
+}
+
+###
+
+### 2.5 LIFE + RISK_BASED (riskScore=50) ✅ → 201 | premium: 135.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "LIFE",
+  "ratingStrategy": "RISK_BASED",
+  "riskScore": 50
+}
+
+###
+
+### 2.6 LIFE + LOYALTY ✅ → 201 | premium: 76.500
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "LIFE",
+  "ratingStrategy": "LOYALTY",
+  "customerSince": 2022
+}
+
+###
+
+### ── RAMO HOME ──────────────────────────────────
+
+### 2.7 HOME + STANDARD ✅ → 201 | premium: 75.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HOME",
+  "ratingStrategy": "STANDARD"
+}
+
+###
+
+### 2.8 HOME + RISK_BASED (riskScore=20) ✅ → 201 | premium: 90.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HOME",
+  "ratingStrategy": "RISK_BASED",
+  "riskScore": 20
+}
+
+###
+
+### 2.9 HOME + LOYALTY (customerSince=2023) ✅ → 201 | premium: 63.750
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HOME",
+  "ratingStrategy": "LOYALTY",
+  "customerSince": 2023
+}
+
+###
+
+### ── RAMO HEALTH ─────────────────────────────────
+
+### 2.10 HEALTH + STANDARD ✅ → 201 | premium: 180.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HEALTH",
+  "ratingStrategy": "STANDARD"
+}
+
+###
+
+### 2.11 HEALTH + RISK_BASED (riskScore=75) ✅ → 201 | premium: 315.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HEALTH",
+  "ratingStrategy": "RISK_BASED",
+  "riskScore": 75
+}
+
+###
+
+### 2.12 HEALTH + LOYALTY ✅ → 201 | premium: 153.000
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HEALTH",
+  "ratingStrategy": "LOYALTY",
+  "customerSince": 2021
+}
+
+###
+
+
+###
+### 3. CONSULTAS DE PÓLIZAS
+###
+
+### 3.1 Obtener póliza por ID ✅ → 200
+GET {{baseUrl}}/policies/{{policyId}}
+Content-Type: {{contentType}}
+
+###
+
+### 3.2 Póliza inexistente ✅ → 404
+GET {{baseUrl}}/policies/00000000-0000-0000-0000-000000000000
+Content-Type: {{contentType}}
+
+###
+
+### 3.3 Todas las pólizas del cliente ✅ → 200
+GET {{baseUrl}}/policies/customer/{{customerId}}
+Content-Type: {{contentType}}
+
+
+###
+### 4. CICLO DE VIDA COMPLETO
+### QUOTED→ISSUED→ACTIVE→SUSPENDED→ACTIVE→CANCELLED
+###
+
+### 4.1 QUOTED → ISSUED ✅ → 200 | evento: policy.issued
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "ISSUED"
+}
+
+###
+
+### 4.2 ISSUED → ACTIVE ✅ → 200 | evento: policy.activated
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "ACTIVE"
+}
+
+###
+
+### 4.3 ACTIVE → SUSPENDED ✅ → 200 | evento: policy.suspended
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "SUSPENDED"
+}
+
+###
+
+### 4.4 SUSPENDED → ACTIVE ✅ → 200 | evento: policy.reactivated
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "ACTIVE"
+}
+
+###
+
+### 4.5 ACTIVE → CANCELLED ✅ → 200 | evento: policy.cancelled
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "CANCELLED"
+}
+
+###
+
+
+###
+### 5. CASOS DE ERROR — requeridos por la rúbrica
+###
+
+### 5.1 Transición inválida desde CANCELLED ✅ → 400
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "ACTIVE"
+}
+
+###
+
+### 5.2 Salto inválido QUOTED → ACTIVE ✅ → 400
+### (crear nueva póliza primero y usar su ID)
+PATCH {{baseUrl}}/policies/{{policyId}}/status
+Content-Type: {{contentType}}
+
+{
+  "targetStatus": "ACTIVE"
+}
+
+###
+
+### 5.3 RISK_BASED sin riskScore ✅ → 400
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "AUTO",
+  "ratingStrategy": "RISK_BASED"
+}
+
+###
+
+### 5.4 RISK_BASED con riskScore fuera de rango ✅ → 400
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "HOME",
+  "ratingStrategy": "RISK_BASED",
+  "riskScore": 150
+}
+
+###
+
+### 5.5 LOYALTY sin customerSince ✅ → 400
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "LIFE",
+  "ratingStrategy": "LOYALTY"
+}
+
+###
+
+### 5.6 LOYALTY con antigüedad menor a 2 años ✅ → 400
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "LIFE",
+  "ratingStrategy": "LOYALTY",
+  "customerSince": 2025
+}
+
+###
+
+### 5.7 Ramo inválido ✅ → 400
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "{{customerId}}",
+  "branch": "INVALID_BRANCH",
+  "ratingStrategy": "STANDARD"
+}
+
+###
+
+### 5.8 Cliente inexistente al crear póliza ✅ → 404
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{
+  "customerId": "00000000-0000-0000-0000-000000000000",
+  "branch": "AUTO",
+  "ratingStrategy": "STANDARD"
+}
+
+###
+
+### 5.9 DTO vacío ✅ → 400 con detalle por campo
+POST {{baseUrl}}/policies
+Content-Type: {{contentType}}
+
+{}

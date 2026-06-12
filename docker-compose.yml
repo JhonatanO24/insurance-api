@@ -1,0 +1,68 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: insurance_postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - insurance_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: apache/kafka:3.8.0 # Versión moderna y estable
+    container_name: insurance_kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      # Escuchamos en el 9092 para afuera (tu máquina) y en el 29092 para adentro (la red de docker)
+      KAFKA_LISTENERS: EXTERNAL://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      # Aquí mapeamos correctamente según las variables y el DNS de docker
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL://localhost:${KAFKA_PORT},INTERNAL://insurance_kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@insurance_kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "${KAFKA_PORT}:9092"
+    networks:
+      - insurance_network
+    healthcheck:
+      test: [ "CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: insurance_kafka_ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: insurance-cluster
+      # Conectamos la UI por el puerto interno seguro (29092) usando el nombre del contenedor
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: insurance_kafka:29092
+    networks:
+      - insurance_network
+    depends_on:
+      kafka:
+        condition: service_healthy # Espera a que Kafka pase el healthcheck antes de iniciar la UI
+
+volumes:
+  postgres_data:
+
+networks:
+  insurance_network:
+    driver: bridge
